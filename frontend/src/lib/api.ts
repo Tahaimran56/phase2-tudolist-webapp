@@ -35,18 +35,38 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     config.body = JSON.stringify(data);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, config);
+  const url = `${API_URL}${endpoint}`;
+  console.log('API Request:', { method: config.method, url, data });
+
+  let response;
+  try {
+    response = await fetch(url, config);
+  } catch (error) {
+    console.error('Network Error:', { url, error });
+    throw new ApiError(
+      0,
+      'Unable to connect to the server. Please check if the backend is running.',
+      { error }
+    );
+  }
 
   if (!response.ok) {
     let errorData;
+    let errorMessage = 'An error occurred';
+
     try {
       errorData = await response.json();
+      errorMessage = errorData.detail || errorData.message || errorMessage;
     } catch {
-      errorData = { detail: response.statusText };
+      // If we can't parse JSON, use status text
+      errorMessage = response.statusText || errorMessage;
+      errorData = { detail: errorMessage };
     }
+
+    console.error('API Error:', { status: response.status, url, errorData });
     throw new ApiError(
       response.status,
-      errorData.detail || 'An error occurred',
+      errorMessage,
       errorData
     );
   }
