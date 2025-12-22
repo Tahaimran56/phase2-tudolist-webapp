@@ -12,15 +12,7 @@
   ],
   "routes": [
     {
-      "src": "/auth/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/api/tasks(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/health",
+      "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {

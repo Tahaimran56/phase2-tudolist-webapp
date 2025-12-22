@@ -6,7 +6,7 @@ from ..schemas.user import MessageResponse, SigninRequest, UserCreate, UserRespo
 from ..services.auth_service import AuthService
 from .deps import CurrentUser, DbSession
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
