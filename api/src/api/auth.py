@@ -15,29 +15,40 @@ def signup(user_data: UserCreate, db: DbSession, response: Response) -> UserResp
 
     Returns the created user and sets session cookie.
     """
-    # Check if email already exists
-    existing_user = AuthService.get_user_by_email(db, user_data.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
+    try:
+        # Check if email already exists
+        existing_user = AuthService.get_user_by_email(db, user_data.email)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered",
+            )
+
+        # Create user
+        user = AuthService.create_user(db, user_data)
+
+        # Create session token and set cookie
+        token = AuthService.create_access_token(user.id)
+        response.set_cookie(
+            key="session",
+            value=token,
+            httponly=True,
+            secure=True,  # Always True on Vercel (HTTPS)
+            samesite="lax",
+            max_age=60 * 60 * 24 * 7,  # 7 days
         )
 
-    # Create user
-    user = AuthService.create_user(db, user_data)
-
-    # Create session token and set cookie
-    token = AuthService.create_access_token(user.id)
-    response.set_cookie(
-        key="session",
-        value=token,
-        httponly=True,
-        secure=False,  # Set to True in production with HTTPS
-        samesite="lax",
-        max_age=60 * 60 * 24 * 7,  # 7 days
-    )
-
-    return UserResponse.model_validate(user)
+        return UserResponse.model_validate(user)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Signup error: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create account: {str(e)}",
+        )
 
 
 @router.post("/signin", response_model=UserResponse)
