@@ -20,6 +20,24 @@ app = FastAPI(
 # Setup CORS middleware
 setup_cors(app)
 
+
+@app.on_event("startup")
+def initialize_database() -> None:
+    """Initialize database tables on startup if they don't exist."""
+    try:
+        from .database import Base, engine
+        from .models.task import Task
+        from .models.user import User
+
+        # Create all tables (this is idempotent - won't recreate existing tables)
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Database initialization warning: {e}")
+        # Don't crash the app, just log the error
+        import traceback
+        traceback.print_exc()
+
 # Include routers
 app.include_router(auth_router)
 app.include_router(tasks_router)
