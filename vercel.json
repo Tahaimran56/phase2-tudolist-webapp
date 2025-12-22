@@ -1,9 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "pip install -r requirements.txt && cd frontend && npm run build",
-  "outputDirectory": "frontend/.next",
-  "installCommand": "pip install -r requirements.txt && cd frontend && npm install",
-  "framework": "nextjs",
   "builds": [
     {
       "src": "api/index.py",
@@ -16,7 +12,15 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/auth/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/tasks(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/health",
       "dest": "/api/index.py"
     },
     {
