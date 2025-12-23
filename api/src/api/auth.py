@@ -34,7 +34,7 @@ def signup(user_data: UserCreate, db: DbSession, response: Response) -> UserResp
             value=token,
             httponly=True,
             secure=True,  # Always True on Vercel (HTTPS)
-            samesite="lax",
+            samesite="none",  # Required for cross-origin cookies
             max_age=60 * 60 * 24 * 7,  # 7 days
         )
 
@@ -70,8 +70,8 @@ def signin(credentials: SigninRequest, db: DbSession, response: Response) -> Use
         key="session",
         value=token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
-        samesite="lax",
+        secure=True,  # Always True on Vercel (HTTPS)
+        samesite="none",  # Required for cross-origin cookies
         max_age=60 * 60 * 24 * 7,  # 7 days
     )
 
