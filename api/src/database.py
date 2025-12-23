@@ -23,16 +23,17 @@ db_url = settings.database_url
 if db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
+# For serverless (Vercel), use minimal connection pooling
 engine = create_engine(
     db_url,
     pool_pre_ping=True,  # Verify connections before use
-    pool_size=5,
-    max_overflow=10,
+    pool_size=2,  # Smaller pool for serverless
+    max_overflow=5,  # Reduced overflow
+    pool_recycle=300,  # Recycle connections after 5 minutes
     echo=settings.is_development,  # Log SQL in development
     connect_args={
         "connect_timeout": 10,
-        "sslmode": "require"
-    }
+    }  # Remove sslmode here - it's already in the URL
 )
 
 # Session factory

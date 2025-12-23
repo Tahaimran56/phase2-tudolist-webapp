@@ -22,8 +22,11 @@ setup_cors(app)
 
 
 @app.on_event("startup")
-def initialize_database() -> None:
+async def initialize_database() -> None:
     """Initialize database tables on startup if they don't exist."""
+    import logging
+    logger = logging.getLogger(__name__)
+
     try:
         from .database import Base, engine
         from .models.task import Task
@@ -31,12 +34,15 @@ def initialize_database() -> None:
 
         # Create all tables (this is idempotent - won't recreate existing tables)
         Base.metadata.create_all(bind=engine)
+        logger.info("✅ Database tables initialized successfully")
         print("✅ Database tables initialized successfully")
     except Exception as e:
+        logger.warning(f"⚠️  Database initialization warning: {e}")
         print(f"⚠️  Database initialization warning: {e}")
         # Don't crash the app, just log the error
         import traceback
         traceback.print_exc()
+        # Continue anyway - tables might already exist
 
 # Include routers
 app.include_router(auth_router)
