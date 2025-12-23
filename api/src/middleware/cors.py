@@ -20,12 +20,14 @@ def setup_cors(app: FastAPI) -> None:
             "http://127.0.0.1:3000",
         ])
 
-    # Allow all Vercel preview deployments
-    allowed_origins.append("https://*.vercel.app")
+    # Use regex to match all Vercel deployments
+    # This allows any *.vercel.app domain
+    allow_origin_regex = r"https://.*\.vercel\.app"
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
+        allow_origin_regex=allow_origin_regex,
         allow_credentials=True,  # Required for cookies
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
